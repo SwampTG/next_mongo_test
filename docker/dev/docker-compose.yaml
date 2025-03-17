@@ -1,0 +1,45 @@
+services:
+  next-server:
+    container_name: next-server
+    build:
+      context: ../../
+      dockerfile: Dockerfile.dev
+    depends_on: 
+    - mongodb
+    ports:
+    - 3000:3000
+    command: tail -f /dev/null
+    volumes:
+      - "../../:/_dev"
+    networks:
+      next-net:
+        # ipv4_address: 172.132.1.2  
+    environment:
+      DB_USERNAME: ${DB_USERNAME:-mongoadmin}
+      DB_PASSWORD: ${DB_PASSWORD:-mongoadmin}
+      DB_DATABASE: ${DB_DATABASE:-candidate}
+      DB_HOST: ${DB_HOST:-mongodb}
+
+  mongodb:
+    image: mongo:5.0
+    container_name: mongo-db
+    volumes:
+    - mongo-data:/data/db
+    networks:
+      next-net:
+        # ipv4_address: 172.132.1.4 
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${DB_USERNAME:-mongoadmin}
+      MONGO_INITDB_ROOT_PASSWORD: ${DB_PASSWORD:-mongoadmin}
+      MONGO_INITDB_DATABASE: ${DB_DATABASE:-candidate}
+
+volumes:
+  mongo-data:
+
+networks:
+  next-net:
+    driver: bridge
+    # ipam:
+    #   config:
+    #   - subnet: 172.132.0.0/16
+    #     ip_range: 172.132.1.0/24
